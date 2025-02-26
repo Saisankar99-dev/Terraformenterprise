@@ -44,35 +44,35 @@ jobs:
       # Step 4: Initialize Terraform in the dev environment
       - name: "Terraform Init"
         run: terraform init -input=false
-        working-directory: environment/dev
+        working-directory: environment/Dev
 
       # # Step 5: Check Terraform Format
       # - name: "Terraform Format Check"
       #   run: terraform fmt -check
-      #   working-directory: environments/dev
+      #   working-directory: environments/Dev
 
       # # Step 6: Validate Terraform Configuration
       # - name: "Terraform Validate"
       #   run: terraform validate
-      #   working-directory: environments/dev
+      #   working-directory: environments/Dev
 
       # # Step 7: Run Security Scan with tfsec
       # - name: "Terraform Security Scan"
       #   uses: aquasecurity/tfsec-action@v1.0.0
       #   with:
-      #     working-directory: environments/dev
+      #     working-directory: environments/Dev
 
       # Step 8: Generate Terraform Plan and Save as Artifact
       - name: "Terraform Plan"
         run: terraform plan  -out=tfplan -input=false
-        working-directory: environment/dev
+        working-directory: environment/Dev
 
       - name: "Upload Terraform Plan Artifact"
         uses: actions/upload-artifact@v4
 
         with:
           name: tfplan
-          path: environment/dev/tfplan
+          path: environment/Dev/tfplan
 
   terraform-apply:
     name: "Terraform Apply (Manual Approval Required)"
@@ -108,4 +108,4 @@ jobs:
       # Step 5: Apply the Terraform Plan
       - name: "Terraform Apply"
         run: terraform apply -auto-approve tfplan
-        working-directory: environment/dev
+        working-directory: environment/Dev
