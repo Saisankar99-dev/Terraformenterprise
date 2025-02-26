@@ -1,0 +1,108 @@
+name: "Terraform CI/CD Enterprise Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+      
+       paths:
+      - 'Terraformenterprise/environment/Dev/**'
+  # pull_request:
+  #   branches:
+  #     - main
+
+env:
+  TF_VERSION: "1.5.0"
+
+permissions:
+  id-token: write   # Required for OIDC-based authentication
+  contents: read    # Allows checkout of repository
+
+jobs:
+  terraform-plan:
+    name: "Terraform Plan"
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout repository
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Terraform
+      - name: "Set Up Terraform"
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      # Step 3: Configure AWS Credentials using OIDC
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}   # Set this secret with your IAM Role ARN
+          aws-region: ${{ secrets.AWS_REGION }}          # Set this secret with your region (e.g., "us-east-1")
+
+      # Step 4: Initialize Terraform in the dev environment
+      - name: "Terraform Init"
+        run: terraform init -input=false
+        working-directory: environments/dev
+
+      # # Step 5: Check Terraform Format
+      # - name: "Terraform Format Check"
+      #   run: terraform fmt -check
+      #   working-directory: environments/dev
+
+      # # Step 6: Validate Terraform Configuration
+      # - name: "Terraform Validate"
+      #   run: terraform validate
+      #   working-directory: environments/dev
+
+      # # Step 7: Run Security Scan with tfsec
+      # - name: "Terraform Security Scan"
+      #   uses: aquasecurity/tfsec-action@v1.0.0
+      #   with:
+      #     working-directory: environments/dev
+
+      # Step 8: Generate Terraform Plan and Save as Artifact
+      - name: "Terraform Plan"
+        run: terraform plan -var="environment=dev" -out=tfplan -input=false
+        working-directory: environments/dev
+
+      - name: "Upload Terraform Plan Artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: environments/dev/tfplan
+
+  terraform-apply:
+    name: "Terraform Apply (Manual Approval Required)"
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    environment:
+      name: production  # This links to a GitHub Environment that requires manual approval
+    steps:
+      # Step 1: Checkout repository
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Terraform
+      - name: "Set Up Terraform"
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      # Step 3: Configure AWS Credentials using OIDC
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 4: Download the Terraform Plan Artifact
+      - name: "Download Terraform Plan Artifact"
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
+
+      # Step 5: Apply the Terraform Plan
+      - name: "Terraform Apply"
+        run: terraform apply -auto-approve tfplan
+        working-directory: environments/dev
