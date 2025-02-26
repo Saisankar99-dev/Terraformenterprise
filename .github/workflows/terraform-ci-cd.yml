@@ -6,7 +6,8 @@ on:
       - main
       
     paths:
-      - 'Terraformenterprise/environment/Dev/**'
+           - 'environment/Dev/**'
+
   # pull_request:
   #   branches:
   #     - main
