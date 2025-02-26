@@ -104,6 +104,7 @@ jobs:
 
         with:
           name: tfplan
+          path: environment/Dev
 
       # Step 5: Apply the Terraform Plan
       - name: "Terraform Apply"
