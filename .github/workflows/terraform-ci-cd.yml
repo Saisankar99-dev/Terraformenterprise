@@ -44,7 +44,7 @@ jobs:
       # Step 4: Initialize Terraform in the dev environment
       - name: "Terraform Init"
         run: terraform init -input=false
-        working-directory: environments/dev
+        working-directory: environment/dev
 
       # # Step 5: Check Terraform Format
       # - name: "Terraform Format Check"
@@ -64,15 +64,15 @@ jobs:
 
       # Step 8: Generate Terraform Plan and Save as Artifact
       - name: "Terraform Plan"
-        run: terraform plan -var="environment=dev" -out=tfplan -input=false
-        working-directory: environments/dev
+        run: terraform plan  -out=tfplan -input=false
+        working-directory: environment/dev
 
       - name: "Upload Terraform Plan Artifact"
         uses: actions/upload-artifact@v4
 
         with:
           name: tfplan
-          path: environments/dev/tfplan
+          path: environment/dev/tfplan
 
   terraform-apply:
     name: "Terraform Apply (Manual Approval Required)"
@@ -108,4 +108,4 @@ jobs:
       # Step 5: Apply the Terraform Plan
       - name: "Terraform Apply"
         run: terraform apply -auto-approve tfplan
-        working-directory: environments/dev
+        working-directory: environment/dev
