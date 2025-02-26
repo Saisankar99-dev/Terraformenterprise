@@ -98,6 +98,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: "Terraform Init (Apply Job)"
+        run: terraform init -input=false
+        working-directory: environment/Dev
+
       # Step 4: Download the Terraform Plan Artifact
       - name: "Download Terraform Plan Artifact"
         uses: actions/download-artifact@v4
