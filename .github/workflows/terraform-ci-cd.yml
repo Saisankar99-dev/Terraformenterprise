@@ -68,7 +68,8 @@ jobs:
         working-directory: environments/dev
 
       - name: "Upload Terraform Plan Artifact"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.0
+
         with:
           name: tfplan
           path: environments/dev/tfplan
@@ -99,7 +100,8 @@ jobs:
 
       # Step 4: Download the Terraform Plan Artifact
       - name: "Download Terraform Plan Artifact"
-        uses: actions/download-artifact@v3
+        uses: actions/upload-artifact@v3.1.0
+
         with:
           name: tfplan
 
